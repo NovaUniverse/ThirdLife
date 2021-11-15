@@ -1,0 +1,2 @@
+# If true the player will receive messages when they loose a life
+message_player: true
