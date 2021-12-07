@@ -1,2 +1,12 @@
-# If true the player will receive messages when they loose a life
+# If true the player will receive messages when they loose a life.
 message_player: true
+
+# If true then red players that has not yet attacked anyone will be protected.
+protect_red_players: true
+
+# If true the /transferlife command will be registered.
+allow_transfer_life: true
+
+# If true then the /transferlife command will be able to revive dead players.
+# Before enabling this set the world spawn location to somewhere thats safe for the player to spawn.
+allow_revive: true

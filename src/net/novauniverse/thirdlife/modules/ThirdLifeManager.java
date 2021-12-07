@@ -20,7 +20,8 @@ import net.zeeraa.novacore.spigot.module.NovaModule;
 import net.zeeraa.novacore.spigot.module.modules.scoreboard.NetherBoardScoreboard;
 import net.zeeraa.novacore.spigot.tasks.SimpleTask;
 
-public class ThridLifeManager extends NovaModule implements Listener {
+public class ThirdLifeManager extends NovaModule implements Listener {
+	private static ThirdLifeManager instance;
 	private Task task;
 
 	@Override
@@ -28,8 +29,13 @@ public class ThridLifeManager extends NovaModule implements Listener {
 		return "ThirdLifeManager";
 	}
 
+	public static ThirdLifeManager getInstance() {
+		return ThirdLifeManager.instance;
+	}
+
 	@Override
 	public void onLoad() {
+		ThirdLifeManager.instance = this;
 		task = new SimpleTask(ThirdLife.getInstance(), new Runnable() {
 			@Override
 			public void run() {
@@ -76,7 +82,7 @@ public class ThridLifeManager extends NovaModule implements Listener {
 			case 1:
 				player.sendMessage(ChatColor.RED + "You are now a red player. Your goal is to attack and kill green and yellow players");
 				break;
-				
+
 			case 0:
 				player.sendMessage(ChatColor.GRAY + "You are now a spectator");
 				break;
@@ -121,7 +127,9 @@ public class ThridLifeManager extends NovaModule implements Listener {
 			// Remove red player protection
 			if (attackerData.getLives() == 1 && attackerData.isProtected()) {
 				attackerData.setProtected(false);
-				attacker.sendMessage(ChatColor.RED + "You are no longer protected since you attacked another player");
+				if (ThirdLife.getInstance().getConfiguration().isRedProtection()) {
+					attacker.sendMessage(ChatColor.RED + "You are no longer protected since you attacked another player");
+				}
 				attackerData.save();
 				this.updatePlayer(attacker);
 			}
@@ -134,7 +142,7 @@ public class ThridLifeManager extends NovaModule implements Listener {
 			}
 
 			// Red player protection
-			if (playerData.getLives() == 1 && playerData.isProtected()) {
+			if (playerData.getLives() == 1 && playerData.isProtected() && ThirdLife.getInstance().getConfiguration().isRedProtection()) {
 				attacker.sendMessage(ChatColor.RED + "You cant attack this player since they have not yet attacked soneone");
 				e.setCancelled(true);
 				return;
@@ -169,12 +177,15 @@ public class ThridLifeManager extends NovaModule implements Listener {
 		NetherBoardScoreboard.getInstance().setPlayerLine(0, player, ChatColor.GOLD + "Lives: " + color + "" + data.getLives());
 
 		if (data.getLives() == 1) {
-			boolean protection = data.isProtected();
-			NetherBoardScoreboard.getInstance().setPlayerLine(1, player, ChatColor.GOLD + "Protected: " + (protection ? ChatColor.GREEN + "yes" : ChatColor.RED + "no"));
+			if (ThirdLife.getInstance().getConfiguration().isRedProtection()) {
+				boolean protection = data.isProtected();
+				NetherBoardScoreboard.getInstance().setPlayerLine(1, player, ChatColor.GOLD + "Protected: " + (protection ? ChatColor.GREEN + "yes" : ChatColor.RED + "no"));
+			}
 		} else {
 			NetherBoardScoreboard.getInstance().setPlayerLine(1, player, "");
 		}
 
+		player.setPlayerListName(color + player.getName());
 		player.setDisplayName(color + player.getName() + ChatColor.RESET);
 
 		if (data.getLives() <= 0) {
